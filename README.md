@@ -1,42 +1,47 @@
-00     This project was developed as part of my practical learning in Python, networking, and cybersecurity.  I hope you would enjoy using this tool and it will make your work easy.
+# Python Network Scanner
 
-1  Python Network Scanner
-
-A Python-based TCP port scanner developed as a practical cybersecurity learning project.
+A Python-based TCP network port scanner developed as a practical learning project in Python, networking, and cybersecurity.
 
 ## Overview
 
-This project allows a user to enter a target IP address or hostname and select TCP ports to scan. The program attempts to connect to the selected ports and reports their status.
+This project is a simple TCP network scanner that allows a user to enter a target IP address or hostname and specify TCP ports to check.
 
-2  Features
+The program attempts to establish TCP connections to the selected ports and reports whether each port is open or closed. Scan results can also be saved to a file for later review.
+
+## Features
 
 - Target IP address or hostname input
-- Multiple port selection
-- TCP port scanning
+- Multiple TCP port selection
+- TCP socket-based scanning
+- Open/closed port detection
 - Input validation
-- Open/closed port reporting
+- Exception handling
+- Scan result display
 - Saving scan results to a file
 
-3  Technologies Used
+## Technologies Used
 
-- Python
-- Python socket programming
+- Python 3
+- `socket` module
 - TCP/IP networking concepts
 - File handling
 - Exception handling
 
-4   What I Learned
+## How It Works
 
-Through this project, I practiced:
+The scanner follows this basic process:
 
-- Python functions and loops
-- Conditional statements
-- Exception handling
-- Dictionaries and lists
-- TCP socket connections
-- Network and port concepts
-- File handling
+1. Accepts a target IP address or hostname.
+2. Accepts a list of TCP ports from the user.
+3. Converts the selected port values into integers.
+4. Attempts a TCP connection to each selected port.
+5. Determines whether the connection succeeds or fails.
+6. Displays the result for each port.
+7. Saves the scan results to a file.
 
-5 Purpose
+## How to Run
 
-This project was developed as part of my practical learning in Python, networking, and cybersecurity.  I hope you would enjoy using this tool and it will make your work easy.
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/alphakhan00/network-scanner.git
