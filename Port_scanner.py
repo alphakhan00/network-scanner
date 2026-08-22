@@ -1,97 +1,130 @@
 import socket
 
 
-print("***************** WELCOME TO NETWORK SCANNER *****************")
+def get_target():
+    while True:
+        target = input("Enter target IP or hostname: ").strip()
 
-while True:
-    target = input("Enter target IP or hostname: ")
+        if target:
+            return target
 
-    if target:
-        break
-
-    print("Target cannot be empty.")
-
-
-print("\n1. Scan specific ports")
-print("2. Scan all ports")
-
-while True:
-    choice = input("Choose an option: ")
-
-    if choice == "1":
-        scanning_port = input("Enter the ports you want to scan: ")
-        ports = scanning_port.split(",")
-        break
-
-    elif choice == "2":
-        ports = range(1, 65536)
-        break
-
-    else:
-        print("Invalid option. Choose 1 or 2.")
+        print("Target cannot be empty.")
 
 
-results = {}
+def get_ports():
+    print("\n1. Scan specific ports")
+    print("2. Scan all ports")
 
+    while True:
+        choice = input("Choose an option: ").strip()
 
-for i in ports:
-    try:
-        i = int(i)
+        if choice == "1":
+            port_input = input("Enter the ports you want to scan: ")
+            return port_input.split(",")
 
-        if 1 <= i <= 65535:
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            s.settimeout(0.5)
-
-            try:
-                result = s.connect_ex((target, i))
-
-                if result == 0:
-                    results[i] = "OPEN"
-                else:
-                    results[i] = "CLOSED"
-
-            except socket.error:
-                continue
-
-            finally:
-                s.close()
+        elif choice == "2":
+            return range(1, 65536)
 
         else:
-            print(i, "is an invalid port")
-            continue
+            print("Invalid option. Choose 1 or 2.")
+
+
+def scan_port(target, port):
+    try:
+        port = int(port)
+
+        if not 1 <= port <= 65535:
+            print(f"{port} is an invalid port.")
+            return None
+
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as scanner:
+            scanner.settimeout(0.5)
+            result = scanner.connect_ex((target, port))
+
+            if result == 0:
+                return "OPEN"
+
+            return "CLOSED"
 
     except ValueError:
-        print("Invalid port:", i)
+        print(f"Invalid port: {port}")
+        return None
+
+    except socket.gaierror:
+        print("Unable to resolve the target.")
+        return None
+
+    except socket.error as error:
+        print(f"Socket error on port {port}: {error}")
+        return None
 
 
-print("\n&&&&&&&&&&& SCAN RESULTS &&&&&&&&&")
+def display_results(target, results):
+    print("\n" + "=" * 45)
+    print("              SCAN RESULTS")
+    print("=" * 45)
 
-open_ports = 0
-closed_ports = 0
-
-for port, status in results.items():
-
-    print("Port", port, "→", status)
-
-    if status == "OPEN":
-        open_ports += 1
-    else:
-        closed_ports += 1
-
-
-print("%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%")
-print("Total ports scanned:", len(results))
-print("Open ports:", open_ports)
-print("Closed ports:", closed_ports)
-
-
-with open("scan_results.txt", "w") as file:
-    file.write(f"The result of your target: {target}\n\n")
+    open_ports = 0
+    closed_ports = 0
 
     for port, status in results.items():
-        file.write(f"Port {port} → {status}\n")
+        print(f"Port {port:<5} → {status}")
 
-    file.write("\n")
-    file.write(f"Total ports scanned: {len(results)}\n")
-    file.write(f"Open ports: {open_ports}\n")
-    file.write(f"Closed ports: {closed_ports}\n")
+        if status == "OPEN":
+            open_ports += 1
+        else:
+            closed_ports += 1
+
+    print("=" * 45)
+    print(f"Total ports scanned: {len(results)}")
+    print(f"Open ports: {open_ports}")
+    print(f"Closed ports: {closed_ports}")
+    print("=" * 45)
+
+
+def save_results(target, results):
+    open_ports = sum(1 for status in results.values() if status == "OPEN")
+    closed_ports = sum(1 for status in results.values() if status == "CLOSED")
+
+    with open("scan_results.txt", "w") as file:
+        file.write(f"Scan target: {target}\n\n")
+
+        for port, status in results.items():
+            file.write(f"Port {port} → {status}\n")
+
+        file.write("\n")
+        file.write(f"Total ports scanned: {len(results)}\n")
+        file.write(f"Open ports: {open_ports}\n")
+        file.write(f"Closed ports: {closed_ports}\n")
+
+
+def main():
+    print("=" * 60)
+    print("             WELCOME TO NETWORK SCANNER")
+    print("=" * 60)
+
+    target = get_target()
+    ports = get_ports()
+
+    results = {}
+
+    print("\nStarting scan...\n")
+
+    for port in ports:
+        status = scan_port(target, port)
+
+        if status is not None:
+            try:
+                port_number = int(port)
+                results[port_number] = status
+            except ValueError:
+                continue
+
+    display_results(target, results)
+    save_results(target, results)
+
+    print("\nResults saved to scan_results.txt")
+
+
+if __name__ == "__main__":
+    main()
